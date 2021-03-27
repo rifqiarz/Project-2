@@ -10,6 +10,7 @@ import classes.DatabaseConnection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -51,6 +52,7 @@ public class DataSiswa extends javax.swing.JFrame {
         }
         catch(SQLException ex){
             ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan pada Database");
         }
         tableSiswa.setModel(dtm);
     }
@@ -64,7 +66,7 @@ public class DataSiswa extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        headingSiswa = new java.awt.Label();
+        headingForm = new java.awt.Label();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableSiswa = new javax.swing.JTable();
         btnDelete = new javax.swing.JButton();
@@ -74,9 +76,9 @@ public class DataSiswa extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        headingSiswa.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        headingSiswa.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
-        headingSiswa.setText("DATA SISWA");
+        headingForm.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        headingForm.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        headingForm.setText("DATA SISWA");
 
         tableSiswa.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -89,6 +91,11 @@ public class DataSiswa extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tableSiswa.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tableSiswaMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tableSiswa);
 
         btnDelete.setText("Hapus");
@@ -133,19 +140,19 @@ public class DataSiswa extends javax.swing.JFrame {
                         .addComponent(btnAdd)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnEdit)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDelete)))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(203, 203, 203)
-                .addComponent(headingSiswa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(headingForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(headingSiswa, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(headingForm, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 373, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -157,13 +164,28 @@ public class DataSiswa extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        headingSiswa.getAccessibleContext().setAccessibleName("Data Siswa");
+        headingForm.getAccessibleContext().setAccessibleName("Data Siswa");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
         // TODO add your handling code here:
+        String nis = tableSiswa.getValueAt(baris, 1).toString();
+        try {
+            Statement stmt = koneksi.createStatement();
+            String query = "DELETE FROM t_siswa WHERE nis = '" + nis + "'";
+            System.out.println(query);
+            int berhasil = stmt.executeUpdate(query);
+            if(berhasil == 1){
+                JOptionPane.showMessageDialog(null, "Data Berhasil Dihapus");
+            } else{
+                JOptionPane.showMessageDialog(null, "Data Gagal Dihapus");
+            }
+        } catch (SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan pada Database");
+        }
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
@@ -172,11 +194,20 @@ public class DataSiswa extends javax.swing.JFrame {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
+        ManageData tambahData = new ManageData(this, true);
+        tambahData.setVisible(true);
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_btnRefreshActionPerformed
+
+    int baris;
+    
+    private void tableSiswaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tableSiswaMouseClicked
+        // TODO add your handling code here:
+        baris = tableSiswa.getSelectedRow();
+    }//GEN-LAST:event_tableSiswaMouseClicked
 
     /**
      * @param args the command line arguments
@@ -218,7 +249,7 @@ public class DataSiswa extends javax.swing.JFrame {
     private javax.swing.JButton btnDelete;
     private javax.swing.JButton btnEdit;
     private javax.swing.JButton btnRefresh;
-    private java.awt.Label headingSiswa;
+    private java.awt.Label headingForm;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable tableSiswa;
     // End of variables declaration//GEN-END:variables
