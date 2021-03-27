@@ -26,7 +26,7 @@ public class DataSiswa extends javax.swing.JFrame {
     
     public DataSiswa() {
         initComponents();
-        koneksi = DatabaseConnection.getKoneksi("localhost", "3306", "root", "", "db_sekolah");
+        koneksi = DatabaseConnection.getConnection("localhost", "3306", "root", "", "db_sekolah");
         showData();
     }
     
@@ -52,7 +52,7 @@ public class DataSiswa extends javax.swing.JFrame {
         }
         catch(SQLException ex){
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan pada Database");
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan di Query");
         }
         tableSiswa.setModel(dtm);
     }
@@ -190,16 +190,20 @@ public class DataSiswa extends javax.swing.JFrame {
 
     private void btnEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditActionPerformed
         // TODO add your handling code here:
+        String nis = tableSiswa.getValueAt(baris, 1).toString();
+        ManageData tambahData = new ManageData(this, true, "Edit", nis);
+        tambahData.setVisible(true);
     }//GEN-LAST:event_btnEditActionPerformed
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
         // TODO add your handling code here:
-        ManageData tambahData = new ManageData(this, true);
+        ManageData tambahData = new ManageData(this, true, "Add", "");
         tambahData.setVisible(true);
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         // TODO add your handling code here:
+        showData();
     }//GEN-LAST:event_btnRefreshActionPerformed
 
     int baris;

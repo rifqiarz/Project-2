@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
  * @author WIN 10
  */
 public class DatabaseConnection {
-    public static Connection getKoneksi(String host, String port, String username, String password, String db) {
+    public static Connection getConnection(String host, String port, String username, String password, String db) {
         String konString = "jdbc:mysql://" + host + ":" + port + "/" + db;
         Connection koneksi = null;
         

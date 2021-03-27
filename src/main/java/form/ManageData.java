@@ -22,14 +22,41 @@ public class ManageData extends javax.swing.JDialog {
      * Creates new form ManageData
      */
     Connection koneksi;
+    String action;
     
-    public ManageData(java.awt.Frame parent, boolean modal) {
+    public ManageData(java.awt.Frame parent, boolean modal, String action, String nis) {
         super(parent, modal);
         initComponents();
-        koneksi = DatabaseConnection.getKoneksi("localhost", "3306", "root", "", "db_sekolah");
+        koneksi = DatabaseConnection.getConnection("localhost", "3306", "root", "", "db_sekolah");
+        
+        this.action = action;
+        headingForm.setText(this.action + " Data");
+        
+        if(this.action.equals("Edit")){
+            inputNIS.setEnabled(false);
+            showData(nis);
+        }
     }
     
-    public void SimpanData(){
+    public void showData(String nis){
+         try{
+            Statement stmt = koneksi.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            String query = "SELECT * FROM t_siswa WHERE nis = '" + nis + "'";
+            System.out.println(query);
+            ResultSet rs = stmt.executeQuery(query);
+            rs.first();
+            System.out.println(rs.first());
+            inputNIS.setText(rs.getString("nis"));
+            inputNama.setText(rs.getString("nama"));
+            comboBoxKelas.setSelectedItem(rs.getString("kelas"));
+            comboBoxJurusan.setSelectedItem(rs.getString("jurusan"));
+        } catch(SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan di Query");
+        }
+    }
+    
+    public void insertData(){
         String nis = inputNIS.getText();
         String nama = inputNama.getText();
         String kelas = comboBoxKelas.getSelectedItem().toString();
@@ -39,6 +66,30 @@ public class ManageData extends javax.swing.JDialog {
             Statement stmt = koneksi.createStatement();
             String query = "INSERT INTO t_siswa(nis, nama, kelas, jurusan) " 
                     + "VALUES('" + nis + "','" + nama + "','" + kelas + "','" + jurusan + "')";
+            System.out.println(query);
+            int berhasil = stmt.executeUpdate(query);
+            if(berhasil == 1){
+                JOptionPane.showMessageDialog(null, "Data Berhasil Dimasukkan");
+            } else{
+                JOptionPane.showMessageDialog(null, "Data Gagal Dimasukkan");
+            }
+        } catch(SQLException ex){
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Terjadi Kesalahan pada Database");
+        }
+    }
+    
+      public void updateData(){
+        String nis = inputNIS.getText();
+        String nama = inputNama.getText();
+        String kelas = comboBoxKelas.getSelectedItem().toString();
+        String jurusan = comboBoxJurusan.getSelectedItem().toString();
+        
+        try{
+            Statement stmt = koneksi.createStatement();
+            String query = "UPDATE t_siswa SET nama = '" + nama + "', "
+                    + "kelas = '" + kelas + "', "
+                    + "jurusan = '" + jurusan + "' WHERE nis = '" + nis + "'";
             System.out.println(query);
             int berhasil = stmt.executeUpdate(query);
             if(berhasil == 1){
@@ -71,12 +122,12 @@ public class ManageData extends javax.swing.JDialog {
         comboBoxKelas = new javax.swing.JComboBox<>();
         labelJurusan = new javax.swing.JLabel();
         comboBoxJurusan = new javax.swing.JComboBox<>();
-        btnInsert = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         headingForm.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
-        headingForm.setText("Tambah Data");
+        headingForm.setText("Add Data");
 
         jSeparator1.setForeground(new java.awt.Color(0, 0, 0));
 
@@ -104,10 +155,10 @@ public class ManageData extends javax.swing.JDialog {
             }
         });
 
-        btnInsert.setText("Simpan");
-        btnInsert.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setText("Simpan");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnInsertActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
 
@@ -121,13 +172,13 @@ public class ManageData extends javax.swing.JDialog {
                     .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(headingForm)
-                        .addGap(0, 235, Short.MAX_VALUE))
+                        .addGap(0, 274, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(labelJurusan)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGroup(layout.createSequentialGroup()
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                         .addComponent(labelNama)
@@ -166,7 +217,7 @@ public class ManageData extends javax.swing.JDialog {
                     .addComponent(comboBoxJurusan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(labelJurusan))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 27, Short.MAX_VALUE)
-                .addComponent(btnInsert, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -181,55 +232,14 @@ public class ManageData extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_comboBoxJurusanActionPerformed
 
-    private void btnInsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInsertActionPerformed
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-        SimpanData();
-    }//GEN-LAST:event_btnInsertActionPerformed
-
-//    /**
-//     * @param args the command line arguments
-//     */
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Nimbus".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(ManageData.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(ManageData.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(ManageData.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(ManageData.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the dialog */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                ManageData dialog = new ManageData(new javax.swing.JFrame(), true);
-//                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-//                    @Override
-//                    public void windowClosing(java.awt.event.WindowEvent e) {
-//                        System.exit(0);
-//                    }
-//                });
-//                dialog.setVisible(true);
-//            }
-//        });
-//    }
+        if(action.equals("Edit")) updateData();
+        else insertData();
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnInsert;
+    private javax.swing.JButton btnSave;
     private javax.swing.JComboBox<String> comboBoxJurusan;
     private javax.swing.JComboBox<String> comboBoxKelas;
     private javax.swing.JLabel headingForm;
