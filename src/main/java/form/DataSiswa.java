@@ -179,6 +179,8 @@ public class DataSiswa extends javax.swing.JFrame {
             int berhasil = stmt.executeUpdate(query);
             if(berhasil == 1){
                 JOptionPane.showMessageDialog(null, "Data Berhasil Dihapus");
+                dtm.getDataVector().removeAllElements();
+                showData();
             } else{
                 JOptionPane.showMessageDialog(null, "Data Gagal Dihapus");
             }
